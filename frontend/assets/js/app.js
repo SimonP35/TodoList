@@ -1,7 +1,6 @@
-
 let app = {
 
-  apiRootUrl : "http://localhost:8080",
+  apiRootUrl : "http://localhost:8000",
 
   init: function()
   {

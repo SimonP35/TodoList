@@ -2,7 +2,6 @@
 
 let tasksList = {
 
-
   initializeTasksFromAPI: function () {
     tasksList.loadTasksFromAPI();
   },

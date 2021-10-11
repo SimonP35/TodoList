@@ -5,6 +5,8 @@
 .header {
   background-color: #ededed;
   padding: 1.2rem;
+  display: flex;
+  justify-content: space-between;
 }
 
 .logo__title {
@@ -143,6 +145,11 @@
 }
 
 @media screen and (min-width: 640px) {
+  .header {
+    display: flex;
+    justify-content: space-between;
+  }
+
   .container {
     padding: 1rem;
   }
@@ -177,7 +184,7 @@
   }
 }
 
-@media screen and (min-width: 800px) {
+@media screen and (min-width: 820px) {
   .header {
     display: flex;
     justify-content: space-between;
@@ -187,7 +194,6 @@
   .logo__title {
     margin-bottom: 0;
   }
-  
   
   .filters {
     display: flex;
@@ -216,10 +222,26 @@
   }
 
   .task__name {
-    width: 50%;
+    width: 45%;
   }
 
   .task__name-edit {
     width: 60%;
   }
+}
+
+@media screen and (max-width: 520px) {
+  .header,
+  .task__content {
+    display: block;
+  }
+
+  .task__buttons {
+    margin-left: 0;
+  }
+
+  p {
+    margin: 0.2rem;
+  }
+
 }
