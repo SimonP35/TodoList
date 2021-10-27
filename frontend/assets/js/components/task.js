@@ -1,32 +1,25 @@
-//console.log( "Module/composant task chargé !" );
-
+// Composant pour la gestion des actions sur les tâches (initialisé dans tasksList.js au chargement de la page)
 let task = {
 
-  // Fonction qui va ajouter toutes les 
-  // listeners necessaires a notre tache
+  // Méthode qui initialise les écouteurs d'évènement de notre tâche
   initTask: function (taskElement) {
-    // Cibler le nom de la tache actuelle
-    // Pour ça, j'utilise querySelector sur mon élément task
-    // afin de trouver uniquement SON titre
+    // Récupération du nom de la tâche actuelle
     let taskNameElement = taskElement.querySelector('.task__name-display');
-
-    // Je peux maintenant écouter l'event "click" sur cette balise
+    // Ajout de l'écouteur d'évènement "click"
     taskNameElement.addEventListener("click", task.handleClickOnTaskName);
 
-    // Même histoire pour le clic sur le bouton "éditer"
+    // Récupération du bouton "éditer"
     let taskEditButtonElement = taskElement.querySelector('.task__button--modify');
+    // Ajout de l'écouteur d'évènement "click"
     taskEditButtonElement.addEventListener("click", task.handleClickOnEditButton);
 
-    // Je récupère l'input du nom de la tache
+    // Récupération de l'input du nom de la tache
     let taskInputNameElement = taskElement.querySelector(".task__name-edit");
-
-    // On ajoute un écouteur d'événement lors de l'appui sur une touche
+    // Ajout de l'écouteur d'évènement "keyup"
     taskInputNameElement.addEventListener("keyup", task.handleKeyUpOnTaskName);
-
-    // On écoute l'event "blur" => perte de focus de l'élément
+    // Ajout de l'écouteur d'évènement "blur" (perte de focus)
     taskInputNameElement.addEventListener("blur", task.handleBlurOnTaskName)
 
-    // Atelier :
     // Récupération de tout les boutons verts pour marquer une tache comme terminée
     let taskValidateButtonElement = taskElement.querySelector(".task__button--validate");
     taskValidateButtonElement.addEventListener("click", task.handleClickOnValidateButton);
@@ -46,7 +39,6 @@ let task = {
     //? Suppression d'une tâche 
     let taskDeleteButtonElement = taskElement.querySelector('.task__button--delete');
     taskDeleteButtonElement.addEventListener("click", task.handleClickOnDeleteButton);
-
   },
 
   createNewTask: function (taskNewTitle, taskNewCategory, taskNewId, taskStatus, taskNewProgressBar) {
@@ -174,53 +166,56 @@ let task = {
       )
   },
 
+  // Handler pour le "click" sur le nom d'une tâche
   handleClickOnTaskName: function (evt) {
+    // Récupération du nom de la tâche courante
     let taskNameElement = evt.currentTarget;
-
-    // Tout ce qu'on va faire, c'est changer la 
-    // classe qui se trouve sur la tache
-    // Le CSS se chargera d'afficher/masquer le p/l'input
-    // En l'occurrence ici, ajouter la classe "task--edit"
-    // Pour ça, je dois d'abord récupérer la tache à partir du nom
-    // element.closest permet de cibler le parent le plus proche qui
-    // correspond au sélecteur fourni
+    // Récupération de la tâche courante à partir de son nom
     let taskElement = taskNameElement.closest(".task");
-
-    // Maintenant que j'ai mon élément task
-    // je lui ajoute la classe task--edit
+    // On ajoute la classe "task--edit" à la tâche (modification du CSS)
     taskElement.classList.add("task--edit");
-
+    // Récupération de l'input de la tâche courante
     let taskNameInputElement = taskElement.querySelector(".task__name-edit");
+    // On donne le focus à l'input
     taskNameInputElement.focus();
-
   },
 
+  // Handler pour le "click" sur le bouton d'édition
   handleClickOnEditButton: function (evt) {
-    // On garde un handler différent pour pas se perdre
-    // mais on va quand même pas coder deux fois la même chose
-    // Donc au clic sur le bouton edit, on fait comme au clic sur le titre ;)
+    // On appelle la méthode "handleClickOnTaskName" qui réalise l'action que l'on recherche
     task.handleClickOnTaskName(evt)
   },
 
+  // Handler pour le "keyup" sur "Enter" 
+  handleKeyUpOnTaskName: function (evt) {
+    // On vérifie que la touche "relachée" est bien "Entrer" avec evt.key
+    if (evt.key === "Enter") {
+      // Si la touche relâchée est bien "Enter" on appelle la méthode "handleBlurOnTaskName"
+      task.handleBlurOnTaskName(evt);
+    }
+  },
+  
+  // Handler pour le "blur" sur l'input de la tâche
   handleBlurOnTaskName: function (evt) {
-    // Récupération de l'élément concerné 
+    // Récupération de l'input courant 
     let taskInputNameElement = evt.currentTarget;
-
-    // On récupère ce qui a été tapé dans l'input
+    // On récupère la valeur de l'input
     let taskNewName = taskInputNameElement.value;
-
-    // On récupère toute la tache
+    // On récupère la tâche relative à l'input
     let taskElement = taskInputNameElement.closest(".task")
-
+    // On récupère l'id de la tâche à l'aide de l'attribut dataset
     let taskId = taskElement.dataset.id;
 
+    // On stocke les données à envoyer sous la forme d'un objet JS
     let data = {
       title: taskNewName
     };
 
+    // On prépare les entêtes HTTP de la requête afin de spécifier que les données sont en JSON
     const httpHeaders = new Headers();
     httpHeaders.append("Content-Type", "application/json");
 
+    // On prépare la configuration de la requête HTTP
     let fetchOptions = {
       method: 'PATCH',
       mode: 'cors',
@@ -231,33 +226,29 @@ let task = {
       body: JSON.stringify(data)
     };
 
-    fetch(app.apiRootUrl + '/tasks/' + taskId, fetchOptions)
-
-      .then(
-        function (response) {
-
-          if (response.status === 200) {
-
+    // On déclenche la requête HTTP à l'API (via le moteur sous-jacent AJAX)
+    fetch(app.apiRootUrl + '/tasks/' + taskId, fetchOptions) // Promesse de réponse a la requete
+      .then( // Lorsqu'on reçoit la réponse
+        function (response) 
+        {
+          // Si l'API nous renvoie le code "204 No Content"
+          if (response.status === 204) {
+            // Je récupère le nom de la tâche à partir de l'élément parent (balise <p>)
             let taskNameElement = taskElement.querySelector(".task__name-display");
+            // Je modifie son contenu avec le nom de la nouvelle tâche
             taskNameElement.textContent = taskNewName;
-
+            // Je retire la classe CSS "task--edit" afin d'afficher la balise <p>
             taskElement.classList.remove("task--edit");
-
-          } else {
-
+          } 
+          // Sinon, on gère les erreurs
+          else 
+          {
+            // Affichage d'une fenêtre de dialogue d'erreur
             alert('La modification a échoué !');
-
+            return;
           }
         }
       )
-  },
-
-  handleKeyUpOnTaskName: function (evt) {
-    // On vérifie que la touche "relachée" est bien Entrée
-    // Pour ça, on utilise evt.key
-    if (evt.key === "Enter") {
-      task.handleBlurOnTaskName(evt);
-    }
   },
 
   handleClickOnValidateButton: function (evt) {

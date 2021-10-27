@@ -59,7 +59,6 @@ let tasksList = {
           let taskNewStatus = jsonResponse[i].status;
 
           let newTaskElement = task.createNewTask(taskNewTitle, taskNewCategory, taskNewId, taskNewStatus, taskNewProgressBar);
-
         }
 
         tasksList.hideArchivedTasks();
